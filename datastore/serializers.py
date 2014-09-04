@@ -34,8 +34,23 @@ class ArtifactSeralizer(serializers.HyperlinkedModelSerializer):
 		fields = ('a_type', 'build')
 
 
-class BuildSerializer(serializers.HyperlinkedModelSerializer):
-	tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='value')	
+class BuildSerializer(serializers.Serializer):
+	name = serializers.CharField(max_length=64)
+	tags = serializers.SlugRelatedField(many=True, slug_field='value')
+	metadata = MetadataValueSerializer(many=True)
+	artifacts = ArtifactSerializer(many=True)
+	
+	
+	def restore_object(self, attrs, instance=None):
+		"""
+		Given a dictionary of deserialized field values, either update
+		an existing model instance, or create a new model instance.
+		"""
+		if instance is not None: #update things
+			return instance
+		else:
+			return Build(**attrs)
+		
 	class Meta:
 		model = Build
 		
